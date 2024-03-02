@@ -5,13 +5,13 @@ import Typography from '@mui/material/Typography';
 
 const ResultCard = ({ teamName, members }) => {
     return (
-        <Card>
+        <Card sx={{ width: 200, height: 400, marginRight: '15px' }}>
             <CardContent>
-                <Typography variant="h5" component="div">
-                    {teamName}
+                <Typography variant="h4" component="div" style={{ color: teamName === '블루' ? 'blue' : 'red', marginBottom: '30px' }}>
+                    {teamName} Team
                 </Typography>
                 {members.map((member, index) => (
-                    <Typography key={index} variant="body2" component="p">
+                    <Typography key={index} variant="body2" component="p" fontSize="25px">
                         {member}
                     </Typography>
                 ))}

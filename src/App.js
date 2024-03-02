@@ -17,21 +17,34 @@ const AppHeader = () => {
 };
 
 function App() {
-  const [membersText, setMembersText] = useState('');
+  const [membersText, setMembersText] = useState([...Array(10)].map(() => ''));
   const [team1, setTeam1] = useState([]);
   const [team2, setTeam2] = useState([]);
+  const [duplicateMessage, setDuplicateMessage] = useState('');
 
-  const handleTextFieldChange = (event) => {
-    setMembersText(event.target.value);
+  const handleTextFieldChange = (event, index) => {
+    const newMembersText = [...membersText];
+    newMembersText[index] = event.target.value;
+    setMembersText(newMembersText);
   };
 
   const handleRollButtonClick = () => {
-    shuffleTeams();
-    shuffleTeams3sec();
+    if (checkForDuplicates()) {
+      setDuplicateMessage("중복된 닉넴 있음!!");
+    } else {
+      setDuplicateMessage("");
+      shuffleTeams();
+      shuffleTeams3sec();
+    }
+  };
+
+  const checkForDuplicates = () => {
+    const uniqueMembers = new Set(membersText.filter(member => member.trim() !== ''));
+    return membersText.length !== uniqueMembers.size;
   };
 
   const shuffleTeams = () => {
-    const membersArray = membersText.split('\n');
+    const membersArray = membersText.filter(member => member.trim() !== '');
 
     const shuffleMembers = membersArray.sort(() => Math.random() - 0.5);
     const middleIndex = Math.ceil(shuffleMembers.length / 2);
@@ -61,36 +74,30 @@ function App() {
   return (
     <>
       <AppHeader />
-      <Box
-        component="form"
-        sx={{
-          display: 'flex',
-          flexWrap: 'nowrap',
-          '& .MuiTextField-root': {
-            m: 1,
-            width: '300px',
-            height: '300px',
-            marginTop: '50px',
-            marginLeft: '50px',
-          },
-        }}
-        noValidate
-        autoComplete="off"
-      >
-        <TextField
-          id="loltextfield"
-          label="여따가 적으시오"
-          placeholder="10명 적으세요"
-          multiline
-          variant="filled"
-          rows={10}
-          value={membersText}
-          onChange={handleTextFieldChange}
-        />
-        <ResultCard teamName="블루 팀" members={team1} />
-        <ResultCard teamName="레드 팀" members={team2} />
+      <Box style={{ display: 'flex' }}>
+        <Box style={{ display: 'flex', flexDirection: 'column', marginTop: '20px', marginLeft: '50px', marginBottom: '50px' }}>
+          {[...Array(10)].map((_, index) => (
+            <TextField
+              key={index}
+              id={`loltextfield${index}`}
+              variant="outlined"
+              label="롤 닉네임"
+              value={membersText[index]}
+              onChange={(event) => handleTextFieldChange(event, index)}
+              inputProps={{ maxLength: 18 }}
+              sx={{ width: '332px', height: '30px', mb: '40px', boxSizing: 'border-box' }}
+            />
+          ))}
+        </Box>
+        <Box component="form" sx={{ display: 'flex', flexDirection: 'row', marginLeft: '50px' }}>
+          <ResultCard teamName="블루" members={team1} />
+          <ResultCard teamName="레드" members={team2} />
+          <Box style={{ display: 'flex', alignItems: 'center', marginTop: '20px' }}>
+            <RollButton onClick={handleRollButtonClick} />
+            {duplicateMessage && <h2 style={{ color: 'red', marginLeft: '10px' }}>{duplicateMessage}</h2>}
+          </Box>
+        </Box>
       </Box>
-      <RollButton onClick={handleRollButtonClick} />
     </>
   );
 }
