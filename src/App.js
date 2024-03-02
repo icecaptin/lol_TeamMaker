@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import RollButton from './Button/RollButton';
-import ResultCard from './Button/ResultCard';
 import './App.css';
+import ResultCard from './Button/ResultCard';
 
 const AppHeader = () => {
   return (
@@ -26,9 +26,13 @@ function App() {
   };
 
   const handleRollButtonClick = () => {
+    shuffleTeams();
+    shuffleTeams3sec();
+  };
+
+  const shuffleTeams = () => {
     const membersArray = membersText.split('\n');
 
-    //팀 섞기
     const shuffleMembers = membersArray.sort(() => Math.random() - 0.5);
     const middleIndex = Math.ceil(shuffleMembers.length / 2);
 
@@ -37,6 +41,21 @@ function App() {
 
     setTeam1(team1);
     setTeam2(team2);
+  };
+
+  const shuffleTeams3sec = () => {
+    const iterations = 30;
+    let count = 0;
+
+    const intervalId = setInterval(() => {
+      if (count >= iterations) {
+        clearInterval(intervalId);
+        return;
+      }
+
+      shuffleTeams();
+      count++;
+    }, 100);
   };
 
   return (
