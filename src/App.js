@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import RollButton from './Button/RollButton';
 import './App.css';
 import ResultCard from './Button/ResultCard';
+// import axios from 'axios';
 
 const AppHeader = () => {
   return (
@@ -21,6 +22,32 @@ function App() {
   const [team1, setTeam1] = useState([]);
   const [team2, setTeam2] = useState([]);
   const [duplicateMessage, setDuplicateMessage] = useState('');
+  const [serverTime, setServerTime] = useState('');
+
+  // useEffect(() => {
+  //   const fetchServerTime = async () => {
+  //     try {
+  //       const response = await axios.get('https://www.ticketlink.co.kr', {
+  //         headers: {
+  //           'Content-Type': 'text/html',
+  //         },
+  //       });
+  //       const doc = parser.parseFromString(response.data, 'text/html');
+  //       const timeElement = doc.querySelector('#server-time');
+
+  //       if (timeElement) {
+  //         setServerTime(timeElement.textContent);
+  //       } else {
+  //         console.error('서버 시간 정보를 찾을 수 없습니다.');
+  //       }
+  //     } catch (error) {
+  //       console.error('Error fetching server time:', error);
+  //     }
+  //   };
+
+  //   fetchServerTime();
+  // }, []);
+
 
   const handleTextFieldChange = (event, index) => {
     const newMembersText = [...membersText];
@@ -33,7 +60,7 @@ function App() {
       setDuplicateMessage("중복된 닉넴 있음!!");
     } else {
       setDuplicateMessage("");
-      shuffleTeams();
+      shuffleTeamsWithConstraints();
       shuffleTeams3sec();
     }
   };
@@ -43,18 +70,25 @@ function App() {
     return membersText.length !== uniqueMembers.size;
   };
 
-  const shuffleTeams = () => {
-    const membersArray = membersText.filter(member => member.trim() !== '');
+  const shuffleTeamsWithConstraints = () => {
+    let validTeams = false;
+    while (!validTeams) {
+      const membersArray = membersText.filter(member => member.trim() !== '');
 
-    const shuffleMembers = membersArray.sort(() => Math.random() - 0.5);
-    const middleIndex = Math.ceil(shuffleMembers.length / 2);
+      const shuffleMembers = membersArray.sort(() => Math.random() - 0.5);
+      const middleIndex = Math.ceil(shuffleMembers.length / 2);
 
-    const team1 = shuffleMembers.slice(0, middleIndex);
-    const team2 = shuffleMembers.slice(middleIndex);
+      const team1 = shuffleMembers.slice(0, middleIndex);
+      const team2 = shuffleMembers.slice(middleIndex);
 
-    setTeam1(team1);
-    setTeam2(team2);
+      if (!team1.includes('귤') || !team1.includes('브레이커')) {
+        setTeam1(team1);
+        setTeam2(team2);
+        validTeams = true;
+      }
+    }
   };
+
 
   const shuffleTeams3sec = () => {
     const iterations = 30;
@@ -66,9 +100,10 @@ function App() {
         return;
       }
 
-      shuffleTeams();
+      shuffleTeamsWithConstraints();
       count++;
     }, 100);
+
   };
 
   return (
@@ -97,6 +132,11 @@ function App() {
             {duplicateMessage && <h2 style={{ color: 'red', marginLeft: '10px' }}>{duplicateMessage}</h2>}
           </Box>
         </Box>
+      </Box>
+
+      <Box>
+        <h1>현재 Ticketlink 서버 시간:</h1>
+        <p>{serverTime}</p>
       </Box>
     </>
   );
